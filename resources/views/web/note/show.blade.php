@@ -11,15 +11,45 @@
                 {{ __(ucwords($note->type)) }}
                 &bull;
                 @if ($note->user_id != Auth::id())
-                    <a href="#">{{ Auth::user()->visibleName() }}</a>
+                    <a href="#">{{ $note->user()->first()->visibleName() }}</a>
                 @elseif (Auth::user()->type == \App\Enums\UserType::Administrator || $note->user_id == Auth::id())
                     <a href="{{ route('web.notes.edit', [ 'id' => $note->id ]) }}">{{ __('Edit') }}</a>
                 @endif
+                <br>
+                <span class="font-light text-gray-400 text-sm">
+                    {{ 'Creation: '.$note->created_at }}
+                    @if ($note->content() != null)
+                        &bull;
+                        {{ 'Last Update: '.$note->content()->updated_at }}
+                        &bull;
+                        @if ($note->contents()->count() > 1)
+                            {{ __('Edited') }}
+                        @endif
+                    @endif
+                </span>
             </h6>
-            <div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-3 px-4 mb-5 font-mono">
-                <pre>{{ $note->content()->content }}</pre>
+
+            <div class="bg-white break-words shadow-md sm:rounded-lg p-3 px-4 mb-5 font-mono">
+                @if ($note->content() != null)
+                    <pre class="break-words whitespace-pre-wrap w-full">{{ $note->content()->content }}</pre>
+                @else
+                    <div class="text-center font-sans font-bold text-gray-500">Content not exists or deleted.</div>
+                @endif
             </div>
-            <div id="comments"></div>
+
+            <div id="comments">
+                @foreach($comments as $comment)
+                    <div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-2 px-2 mb-5">
+                        <div class="float-left w-auto inline-block">
+                            <img src="{{ $comment->user()->first()->profile_photo_url }}" alt="{{ $comment->user()->first()->visibleName() }}" class="inline-block rounded-full w-100">
+                        </div>
+                        <div class="float-left w-auto inline-block">
+                            <div class="font-bold capitalize align-top ml-3 inline-block">{{ $comment->user()->first()->visibleName() }}</div>
+                            <div class="ml-3">{{ $comment->content }}</div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
             @if ($note->comments)
                 <div class="mb-5">
                     <x-jet-validation-errors class="mb-4" />
@@ -51,16 +81,18 @@
             }
         };
 
+        let _token = '{{ Auth::user()->tokens()->where('name', 'private-token')->first()->token }}';
+
         /**
          * Add comment element to comments
          * @param id
          */
         function addComment(id) {
             const $comments = $('#comments');
-            let url = window.Application.api_url + '/comment/read/' + id;
+            let url = window.Application.api_url + '/comment/read/' + id + '?token=' + _token;
             axios.get(url, config).then((commentResponse) => {
                 const comment = commentResponse.data.response;
-                axios.get(window.Application.api_url + '/user/read/' + comment.user_id, config).then((userResponse) => {
+                axios.get(window.Application.api_url + '/user/read/' + comment.user_id + '?token=' + _token, config).then((userResponse) => {
                     const user = userResponse.data.response;
 
                     const $container = $('<div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-2 px-2 mb-5"></div>');
@@ -93,7 +125,7 @@
         function getComments() {
             const $comments = $('#comments');
             $comments.html('');
-            let url = window.Application.api_url + '/comment/';
+            let url = window.Application.api_url + '/comment/?token=' + _token;
             axios.get(url, config).then((commentResponse) => {
                 $.each(commentResponse.data.response, function (index, comment) {
                     addComment(comment.id);
@@ -108,11 +140,13 @@
             let data = {
                 note_id: {{ $note->id }},
                 content: document.getElementById('comment').value,
+                token: _token,
             };
 
             axios.post(window.Application.api_url + '/comment/store', data, config).then((response) => {
                 if (response.status === 200) {
                     addComment(response.data.response.id);
+                    document.getElementById('comment').value = '';
                 }
             }).catch((error) => {
 
@@ -120,7 +154,7 @@
         }
 
         $(document).ready(function () {
-            getComments();
+            // getComments();
         });
     </script>
 </x-app-layout>

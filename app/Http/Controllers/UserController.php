@@ -25,6 +25,10 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('user:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         return response()->json([
             'success' => true,
@@ -41,6 +45,10 @@ class UserController extends Controller
      */
     public function show(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('user:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $user = User::findOrFail($id);
         return response()->json([

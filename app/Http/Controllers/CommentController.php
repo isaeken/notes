@@ -28,6 +28,10 @@ class CommentController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('comment:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         return response()->json([
             'success' => true,
@@ -44,6 +48,10 @@ class CommentController extends Controller
      */
     public function show(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('comment:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $comment = Comment::findOrFail($id);
         return response()->json([
@@ -60,6 +68,10 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('comment:create'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $request->validate([
             'note_id' => 'required|exists:notes,id',
@@ -88,6 +100,10 @@ class CommentController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('comment:update'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $request->validate([ 'content' => 'required|min:2' ]);
         $comment = Comment::findOrFail($id);
@@ -109,6 +125,10 @@ class CommentController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('comment:delete'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $comment = Comment::findOrFail($id);
         abort_if($request->user()->type != UserType::Administrator && $comment->user_id != $request->user()->id, 403);

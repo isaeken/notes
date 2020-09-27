@@ -59,9 +59,12 @@
                 }
             };
 
+            let _token = '{{ Auth::user()->tokens()->where('name', 'private-token')->first()->token }}';
+
             let url = window.Application.api_url + '/note/store';
 
             let data = {
+                token: _token,
                 title: document.getElementById('title').value,
                 type: document.getElementById('type').value,
                 content: document.getElementById('content').value,

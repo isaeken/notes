@@ -27,6 +27,10 @@ class NoteController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('note:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         return response()->json([
             'success' => true,
@@ -46,6 +50,10 @@ class NoteController extends Controller
      */
     public function show(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('note:read'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $note = Note::findOrFail($id);
         return response()->json([
@@ -62,6 +70,10 @@ class NoteController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('note:create'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $request->validate([
             'title' => 'required|min:2',
@@ -103,6 +115,10 @@ class NoteController extends Controller
      */
     public function update(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('note:update'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $request->validate([
             'title' => 'required|min:2',
@@ -145,6 +161,10 @@ class NoteController extends Controller
      */
     public function destroy(Request $request, int $id)
     {
+        $request->validate([ 'token' => 'required' ]);
+        $request->user()->withAccessToken($request->user()->tokens()->where('token', $request->token)->first());
+        abort_if(!$request->user()->tokenCan('note:delete'), 403);
+
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $note = Note::findOrFail($id);
         abort_if($request->user()->type != UserType::Administrator && $note->user_id != $request->user()->id, 403);

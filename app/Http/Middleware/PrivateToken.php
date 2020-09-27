@@ -21,7 +21,12 @@ class PrivateToken
         {
             if (count(Auth::user()->tokens) < 1)
             {
-                Auth::user()->createToken('private-token', [ 'create', 'read', 'update', 'delete' ]);
+                Auth::user()->createToken('private-token', [
+                    'note:create', 'note:read', 'note:update', 'note:delete',
+                    'comment:create', 'comment:read', 'comment:update', 'comment:delete',
+                    'user:create', 'user:read', 'user:update', 'user:delete',
+                ]);
+                return redirect()->route('web.home.index');
             }
         }
         return $next($request);

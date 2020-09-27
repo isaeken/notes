@@ -38,7 +38,7 @@
             </header>
 
             <!-- Page Content -->
-            <main>
+            <main class="mx-8">
                 {{ $slot }}
             </main>
         </div>

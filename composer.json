@@ -1,10 +1,13 @@
 {
-    "name": "laravel/laravel",
+    "name": "isaeken/notes",
     "type": "project",
-    "description": "The Laravel Framework.",
-    "keywords": [
-        "framework",
-        "laravel"
+    "description": "Basic note app Laravel with rest api.",
+    "authors": [
+        {
+            "email": "hello@isaeken.com.tr",
+            "homepage": "https://www.isaeken.com.tr",
+            "name": "İsa Eken"
+        }
     ],
     "license": "MIT",
     "require": {

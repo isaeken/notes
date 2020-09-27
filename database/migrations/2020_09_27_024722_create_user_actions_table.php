@@ -17,7 +17,7 @@ class CreateUserActionsTable extends Migration
             $table->id();
             $table->enum('state', \App\Enums\States::asArray())->default(\App\Enums\States::Active);
             $table->enum('level', \App\Enums\LogLevel::asArray())->default(\App\Enums\LogLevel::Info);
-            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('user_id')->nullable()->default(null)->references('id')->on('users');
             $table->string('message');
             $table->timestamps();
         });

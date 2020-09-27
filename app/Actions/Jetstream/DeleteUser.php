@@ -2,6 +2,7 @@
 
 namespace App\Actions\Jetstream;
 
+use App\Enums\States;
 use Laravel\Jetstream\Contracts\DeletesUsers;
 
 class DeleteUser implements DeletesUsers
@@ -14,6 +15,7 @@ class DeleteUser implements DeletesUsers
      */
     public function delete($user)
     {
-        $user->delete();
+        $user->update([ 'state' => States::Deleted ]);
+//        $user->delete();
     }
 }

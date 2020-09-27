@@ -26,7 +26,3 @@ Route::middleware('auth')->namespace('\App\Http\Controllers\Web')->group(functio
         Route::get('/delete/{id}','NoteController@delete')->name('web.notes.delete');
     });
 });
-
-Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');

@@ -48,7 +48,9 @@
                 }
             };
 
-            let url = window.Application.api_url + '/note/destroy/{{ $note->id }}';
+            let _token = '{{ Auth::user()->tokens()->where('name', 'private-token')->first()->token }}';
+
+            let url = window.Application.api_url + '/note/destroy/{{ $note->id }}?token=' + _token;
 
             axios.delete(url, config).then((response) => {
                 if (response.status === 200) {

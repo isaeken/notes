@@ -71,6 +71,14 @@ class User extends Authenticatable
     /**
      * @return string
      */
+    protected function defaultProfilePhotoUrl()
+    {
+        return 'https://ui-avatars.com/api/?name='.urlencode(strtolower($this->first_name.' '.$this->last_name)).'&color=7F9CF5&background=EBF4FF';
+    }
+
+    /**
+     * @return string
+     */
     public function visibleName() : string
     {
         $name = '';

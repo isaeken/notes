@@ -9,11 +9,11 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" id="homeNotes">
             @forelse($notes as $note)
                 <a href="{{ route('web.notes.show', [ 'id' => $note->id ]) }}">
-                    <div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-5 mb-5">
+                    <div class="bg-white break-words shadow-md sm:rounded-lg p-5 mb-5">
                         <h5 class="text-2xl">
                             {{ $note->title }}
                         </h5>
-                        <pre class="text-gray-500">{{ Str::limit($note->content()->content, 120) }}</pre>
+                        <pre class="text-gray-500 break-words whitespace-pre-wrap w-full">{{ $note->content() != null ? Str::limit($note->content()->content, 120) : '' }}</pre>
                     </div>
                 </a>
             @empty
