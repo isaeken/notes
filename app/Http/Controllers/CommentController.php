@@ -2,84 +2,121 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\NoteType;
+use App\Enums\States;
+use App\Enums\UserType;
 use App\Models\Comment;
+use App\Models\Content;
+use App\Models\Note;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * NoteController constructor.
      */
-    public function index()
+    public function __construct()
     {
-        //
+
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Get all comments.
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function index(Request $request)
     {
-        //
+        abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        return response()->json([
+            'success' => true,
+            'response' => Comment::where('state', States::Active)->get(),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Show a comment.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Request $request, int $id)
+    {
+        abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        $comment = Comment::findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'response' => $comment,
+        ]);
+    }
+
+    /**
+     * Store a new comment.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        //
+        abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        $request->validate([
+            'note_id' => 'required|exists:notes,id',
+            'content' => 'required|min:2',
+        ]);
+        $comment = Comment::create([
+            'state' => States::Active,
+            'user_id' => $request->user()->id,
+            'note_id' => $request->note_id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'content' => $request->content,
+        ]);
+        return response()->json([
+            'success' => true,
+            'response' => $comment,
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Update a comment.
      *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Comment $comment)
+    public function update(Request $request, int $id)
     {
-        //
+        abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        $request->validate([ 'content' => 'required|min:2' ]);
+        $comment = Comment::findOrFail($id);
+        abort_if($comment->state != States::Active, 404);
+        abort_if($request->user()->type != UserType::Administrator && $comment->user_id != $request->user()->id, 403);
+        $comment->update([ 'content' => $request->content ]);
+        return response()->json([
+            'success' => true,
+            'response' => $comment,
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Destroy a comment.
      *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit(Comment $comment)
+    public function destroy(Request $request, int $id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Comment $comment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Comment  $comment
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Comment $comment)
-    {
-        //
+        abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        $comment = Comment::findOrFail($id);
+        abort_if($request->user()->type != UserType::Administrator && $comment->user_id != $request->user()->id, 403);
+        abort_if($comment->state != States::Active, 404);
+        $comment->update([ 'state' => States::Deleted ]);
+        return response()->json([
+            'success' => true,
+            'response' => 'ok',
+        ]);
     }
 }

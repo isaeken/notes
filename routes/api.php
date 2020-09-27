@@ -27,9 +27,14 @@ Route::prefix('/v1')->middleware('auth:sanctum')->namespace('\App\Http\Controlle
     Route::prefix('/comment')->group(function () {
         Route::get('/', 'CommentController@index');
         Route::post('/store', 'CommentController@store');
-        Route::get('/read/{id}', 'CommentController@read');
+        Route::get('/read/{id}', 'CommentController@show');
         Route::put('/update/{id}', 'CommentController@update');
         Route::delete('/destroy/{id}', 'CommentController@destroy');
+    });
+
+    Route::prefix('/user')->group(function () {
+        Route::get('/', 'UserController@index');
+        Route::get('/read/{id}', 'UserController@show');
     });
 
 });
