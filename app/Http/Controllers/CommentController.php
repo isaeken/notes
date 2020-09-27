@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\NoteType;
+use App\Enums\LogLevel;
 use App\Enums\States;
 use App\Enums\UserType;
 use App\Models\Comment;
-use App\Models\Content;
-use App\Models\Note;
+use App\Models\UserAction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -24,7 +24,7 @@ class CommentController extends Controller
      * Get all comments.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(Request $request)
     {
@@ -33,6 +33,11 @@ class CommentController extends Controller
         abort_if(!$request->user()->tokenCan('comment:read'), 403);
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched all comments. :user', [ 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => Comment::where('state', States::Active)->get(),
@@ -44,7 +49,7 @@ class CommentController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show(Request $request, int $id)
     {
@@ -54,6 +59,11 @@ class CommentController extends Controller
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $comment = Comment::findOrFail($id);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched comment :comment - :user', [ 'comment' => $comment->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $comment,
@@ -64,7 +74,7 @@ class CommentController extends Controller
      * Store a new comment.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -85,6 +95,11 @@ class CommentController extends Controller
             'user_agent' => $request->userAgent(),
             'content' => $request->content,
         ]);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Created comment. :comment - :user', [ 'comment' => $comment->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $comment,
@@ -96,7 +111,7 @@ class CommentController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, int $id)
     {
@@ -110,6 +125,11 @@ class CommentController extends Controller
         abort_if($comment->state != States::Active, 404);
         abort_if($request->user()->type != UserType::Administrator && $comment->user_id != $request->user()->id, 403);
         $comment->update([ 'content' => $request->content ]);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Updated comment. :comment - :user', [ 'comment' => $comment->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $comment,
@@ -121,7 +141,7 @@ class CommentController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy(Request $request, int $id)
     {
@@ -134,6 +154,11 @@ class CommentController extends Controller
         abort_if($request->user()->type != UserType::Administrator && $comment->user_id != $request->user()->id, 403);
         abort_if($comment->state != States::Active, 404);
         $comment->update([ 'state' => States::Deleted ]);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Deleted comment. :comment - :user', [ 'comment' = $comment->id 'user' => $request->user()->email ])
+        ])
         return response()->json([
             'success' => true,
             'response' => 'ok',

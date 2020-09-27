@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LogLevel;
 use App\Enums\NoteType;
 use App\Enums\States;
 use App\Enums\UserType;
 use App\Models\Content;
 use App\Models\Note;
+use App\Models\UserAction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NoteController extends Controller
@@ -23,7 +26,7 @@ class NoteController extends Controller
      * Get all notes.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(Request $request)
     {
@@ -32,6 +35,11 @@ class NoteController extends Controller
         abort_if(!$request->user()->tokenCan('note:read'), 403);
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched all notes. :user', [ 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => Note::where('state', States::Active)
@@ -46,7 +54,7 @@ class NoteController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show(Request $request, int $id)
     {
@@ -56,6 +64,11 @@ class NoteController extends Controller
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $note = Note::findOrFail($id);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched note. :note - :user', [ 'note' => $note->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $note,
@@ -66,7 +79,7 @@ class NoteController extends Controller
      * Store a new note.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request)
     {
@@ -97,6 +110,11 @@ class NoteController extends Controller
             'user_agent' => $request->userAgent(),
             'content' => $request->content,
         ]);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Created note. :note - :user', [ 'note' => $note->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => [
@@ -111,7 +129,7 @@ class NoteController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, int $id)
     {
@@ -146,6 +164,11 @@ class NoteController extends Controller
             'note' => $note,
             'content' => $content,
         ];
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Updated note. :note - :user', [ 'note' => $note->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $response,
@@ -157,7 +180,7 @@ class NoteController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy(Request $request, int $id)
     {
@@ -170,6 +193,11 @@ class NoteController extends Controller
         abort_if($request->user()->type != UserType::Administrator && $note->user_id != $request->user()->id, 403);
         abort_if($note->state != States::Active, 404);
         $note->update([ 'state' => States::Deleted ]);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Deleted note. :note - :user', [ 'note' => $note->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => 'ok',

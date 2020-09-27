@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LogLevel;
 use App\Enums\States;
 use App\Enums\UserType;
 use App\Models\User;
+use App\Models\UserAction;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -21,7 +24,7 @@ class UserController extends Controller
      * Get all users.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(Request $request)
     {
@@ -30,6 +33,11 @@ class UserController extends Controller
         abort_if(!$request->user()->tokenCan('user:read'), 403);
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched all users. :user', [ 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => User::where('state', States::Active)->get(),
@@ -41,7 +49,7 @@ class UserController extends Controller
      *
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function show(Request $request, int $id)
     {
@@ -51,6 +59,11 @@ class UserController extends Controller
 
         abort_if($request->user()->type == UserType::Banned || $request->user()->state != States::Active, 403);
         $user = User::findOrFail($id);
+        UserAction::create([
+            'level' => LogLevel::Notice,
+            'user_id' => $request->user()->id,
+            'message' => __('Fetched user. :fetch - :user', [ 'fetch' => $user->id, 'user' => $request->user()->email ])
+        ]);
         return response()->json([
             'success' => true,
             'response' => $user,
