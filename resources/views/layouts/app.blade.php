@@ -18,6 +18,7 @@
         <!-- Scripts -->
         <script>
             window.Application = {
+                api_url: '{{ '/api/v1' }}',
                 api_token: '{{ Auth::user()->tokens->first()->plainTextToken }}'
             }
         </script>

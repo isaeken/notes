@@ -42,7 +42,7 @@
                     </div>
 
                     <div class="flex items-center justify-end mt-4">
-                        <x-jet-button class="ml-4" onclick="sendCreateNoteRequest()">
+                        <x-jet-button class="ml-4" onclick="execute()">
                             {{ __('Create Note') }}
                         </x-jet-button>
                     </div>
@@ -51,18 +51,28 @@
         </div>
     </div>
     <script type="application/javascript" defer>
-        function sendCreateNoteRequest() {
-            let title = document.getElementById('title').value;
-            let type = document.getElementById('type').value;
-            let content = document.getElementById('content').value;
-            let comments = document.getElementById('comments').checked;
-            createNote(title, type, content, comments, function (response) {
-                if (response.status === 200) {
-                    document.location.href = response.data.response.url
+        function execute() {
+            let config = {
+                headers: {
+                    Authorization: 'Bearer ' + window.Application.api_token,
+                    Accept: 'application/json'
                 }
-            }, function (response) {
+            };
 
-            }, function (response) {
+            let url = window.Application.api_url + '/note/store';
+
+            let data = {
+                title: document.getElementById('title').value,
+                type: document.getElementById('type').value,
+                content: document.getElementById('content').value,
+                comments: document.getElementById('comments').checked,
+            };
+
+            axios.post(url, data, config).then((response) => {
+                if (response.status === 200) {
+                    window.location.href = response.data.response.url;
+                }
+            }).catch((error) => {
 
             });
         }
