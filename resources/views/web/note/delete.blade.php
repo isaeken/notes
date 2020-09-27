@@ -31,7 +31,7 @@
                         <a href="{{ route('web.notes.show', [ 'id' => $note->id ]) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:shadow-outline-gray disabled:opacity-25 transition ease-in-out duration-150 ml-4">
                             {{ __('Cancel') }}
                         </a>
-                        <x-jet-button onclick="deleteNote()" class="inline-flex items-center px-4 py-2 bg-red-300 border border-transparent rounded-md font-semibold text-xs text-black uppercase tracking-widest hover:bg-red-400 active:bg-red-500 focus:outline-none focus:border-red-900 focus:shadow-outline-red disabled:opacity-25 transition ease-in-out duration-150 ml-4">
+                        <x-jet-button onclick="execute()" class="inline-flex items-center px-4 py-2 bg-red-300 border border-transparent rounded-md font-semibold text-xs text-black uppercase tracking-widest hover:bg-red-400 active:bg-red-500 focus:outline-none focus:border-red-900 focus:shadow-outline-red disabled:opacity-25 transition ease-in-out duration-150 ml-4">
                             {{ __('Delete') }}
                         </x-jet-button>
                     </div>
@@ -40,14 +40,23 @@
         </div>
     </div>
     <script type="application/javascript" defer>
-        function sendDeleteNoteRequest() {
-            deleteNote({{ $note->id }}, function (response) {
-                if (response.status === 200) {
-                    document.location.href = response.data.response.url
+        function execute() {
+            let config = {
+                headers: {
+                    Authorization: 'Bearer ' + window.Application.api_token,
+                    Accept: 'application/json'
                 }
-            }, function (response) {
+            };
 
-            }, function (response) {
+            let _token = '{{ Auth::user()->tokens()->where('name', 'private-token')->first()->token }}';
+
+            let url = window.Application.api_url + '/note/destroy/{{ $note->id }}?token=' + _token;
+
+            axios.delete(url, config).then((response) => {
+                if (response.status === 200) {
+                    window.location.href = "{{ route('web.home.index') }}";
+                }
+            }).catch((error) => {
 
             });
         }

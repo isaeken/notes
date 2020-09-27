@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use App\Enums\NoteType;
 use App\Enums\States;
@@ -26,9 +26,7 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        $notes = Note::where('state', States::Active);
-        if (Auth::user()->type != UserType::Administrator) $notes = $notes->where('type', '!=', NoteType::Private);
-        $notes = $notes->get();
+        $notes = Note::where([ 'state' => States::Active, 'type' => NoteType::Private, 'user_id' => Auth::id() ])->orWhere([ [ 'type', '!=', NoteType::Private ], [ 'state', States::Active ] ])->get();
         return view('web.home.index',compact('notes'));
     }
 }

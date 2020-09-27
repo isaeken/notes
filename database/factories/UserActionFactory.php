@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\LogLevel;
+use App\Models\User;
 use App\Models\UserAction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +24,9 @@ class UserActionFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'level' => LogLevel::getRandomValue(),
+            'user_id' => User::all()->random(1)->first()->id,
+            'message' => $this->faker->text,
         ];
     }
 }

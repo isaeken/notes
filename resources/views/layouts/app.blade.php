@@ -18,6 +18,7 @@
         <!-- Scripts -->
         <script>
             window.Application = {
+                api_url: '{{ '/api/v1' }}',
                 api_token: '{{ Auth::user()->tokens->first()->plainTextToken }}'
             }
         </script>
@@ -37,7 +38,7 @@
             </header>
 
             <!-- Page Content -->
-            <main>
+            <main class="mx-8">
                 {{ $slot }}
             </main>
         </div>

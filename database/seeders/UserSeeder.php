@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class NoteSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +15,6 @@ class NoteSeeder extends Seeder
      */
     public function run(int $count = 10)
     {
-        \App\Models\Note::factory($count)->create();
+        User::factory($count)->create();
     }
 }

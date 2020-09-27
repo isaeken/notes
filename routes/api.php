@@ -14,8 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/**
+ * v1 api
+ */
 Route::prefix('/v1')->middleware('auth:sanctum')->namespace('\App\Http\Controllers')->group(function () {
 
+    /**
+     * Note routes
+     */
     Route::prefix('/note')->group(function () {
         Route::get('/', 'NoteController@index');
         Route::post('/store', 'NoteController@store');
@@ -24,16 +30,23 @@ Route::prefix('/v1')->middleware('auth:sanctum')->namespace('\App\Http\Controlle
         Route::delete('/destroy/{id}', 'NoteController@destroy');
     });
 
+    /**
+     * Comment routes
+     */
     Route::prefix('/comment')->group(function () {
         Route::get('/', 'CommentController@index');
         Route::post('/store', 'CommentController@store');
-        Route::get('/read/{id}', 'CommentController@read');
+        Route::get('/read/{id}', 'CommentController@show');
         Route::put('/update/{id}', 'CommentController@update');
         Route::delete('/destroy/{id}', 'CommentController@destroy');
     });
 
-});
+    /**
+     * User routes
+     */
+    Route::prefix('/user')->group(function () {
+        Route::get('/', 'UserController@index');
+        Route::get('/read/{id}', 'UserController@show');
+    });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
 });

@@ -9,10 +9,11 @@ class UserActionSeeder extends Seeder
     /**
      * Run the database seeds.
      *
+     * @param int $count
      * @return void
      */
-    public function run()
+    public function run(int $count = 10)
     {
-        //
+        \App\Models\UserAction::factory($count)->create();
     }
 }

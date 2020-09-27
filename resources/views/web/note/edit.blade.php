@@ -45,7 +45,7 @@
                         <a href="{{ route('web.notes.delete', [ 'id' => $note->id ]) }}" class="inline-flex items-center px-4 py-2 bg-red-300 border border-transparent rounded-md font-semibold text-xs text-black uppercase tracking-widest hover:bg-red-400 active:bg-red-500 focus:outline-none focus:border-red-900 focus:shadow-outline-red disabled:opacity-25 transition ease-in-out duration-150 ml-4">
                             {{ __('Delete Note') }}
                         </a>
-                        <x-jet-button class="ml-4" onclick="sendUpdateNoteRequest()">
+                        <x-jet-button class="ml-4" onclick="execute()">
                             {{ __('Save Note') }}
                         </x-jet-button>
                     </div>
@@ -54,19 +54,31 @@
         </div>
     </div>
     <script type="application/javascript" defer>
-        function sendUpdateNoteRequest() {
-            let note = {{ $note->id }};
-            let title = document.getElementById('title').value;
-            let type = document.getElementById('type').value;
-            let content = document.getElementById('content').value;
-            let comments = document.getElementById('comments').checked;
-            updateNote(note, title, type, content, comments, function (response) {
-                if (response.status === 200) {
-                    document.location.href = response.data.response.url
+        function execute() {
+            let config = {
+                headers: {
+                    Authorization: 'Bearer ' + window.Application.api_token,
+                    Accept: 'application/json'
                 }
-            }, function (response) {
+            };
 
-            }, function (response) {
+            let _token = '{{ Auth::user()->tokens()->where('name', 'private-token')->first()->token }}';
+
+            let url = window.Application.api_url + '/note/update/{{ $note->id }}';
+
+            let data = {
+                token: _token,
+                title: document.getElementById('title').value,
+                type: document.getElementById('type').value,
+                content: document.getElementById('content').value,
+                comments: document.getElementById('comments').checked,
+            };
+
+            axios.put(url, data, config).then((response) => {
+                if (response.status === 200) {
+                    window.location.reload();
+                }
+            }).catch((error) => {
 
             });
         }

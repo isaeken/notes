@@ -5,16 +5,13 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-jet-application-mark class="block h-9 w-auto" />
+                    <a href="{{ route('web.home.index') }}">
+                        {{ config('app.name', 'Notes') }}
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-jet-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-jet-nav-link>
                     <x-jet-nav-link href="{{ route('web.notes.create') }}" :active="request()->routeIs('web.notes.create')">
                         {{ __('Write Note') }}
                     </x-jet-nav-link>
@@ -108,8 +105,11 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-jet-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            <x-jet-responsive-nav-link href="{{ route('web.home.index') }}" :active="request()->routeIs('web.home.index')">
+                {{ __('Home') }}
+            </x-jet-responsive-nav-link>
+            <x-jet-responsive-nav-link href="{{ route('web.notes.create') }}" :active="request()->routeIs('web.notes.create')">
+                {{ __('Write Note') }}
             </x-jet-responsive-nav-link>
         </div>
 
