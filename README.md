@@ -1,4 +1,2 @@
-## Notes
-
-Laravel based basic note sharing application with REST api.
-
+# ABANDONED
+[New project is here](https://github.com/privbin/privbin)
